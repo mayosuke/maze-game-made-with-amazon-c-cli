@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迷路脱出ゲーム</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #ecf0f1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 2.5em;
+        }
+        
+        #gameContainer {
+            border: 3px solid #34495e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            background: #ecf0f1;
+        }
+        
+        #instructions {
+            margin-top: 20px;
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .controls {
+            margin: 15px 0;
+            padding: 15px;
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            border-radius: 8px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .features {
+            margin: 15px 0;
+            padding: 15px;
+            background: linear-gradient(145deg, #27ae60, #229954);
+            border-radius: 8px;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: linear-gradient(145deg, #2980b9, #21618c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .game-info {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .control-buttons {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .bgm-button {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        
+        .bgm-button.on {
+            background: linear-gradient(145deg, #27ae60, #229954);
+        }
+        
+        .bgm-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .bgm-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 600px) {
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 迷路脱出ゲーム</h1>
+    
+    <div id="gameContainer"></div>
+    
+    <div id="instructions">
+        <div class="controls">
+            <strong>🎯 操作方法:</strong><br>
+            カーソルキー または WASD キーでプレイヤーを移動<br>
+            ゴール（緑の丸）に到達するとクリア！
+        </div>
+        
+        <div class="game-info">
+            <div class="features">
+                <strong>🎨 ゲーム機能:</strong><br>
+                • ランダム迷路生成（20×20グリッド）<br>
+                • プレイヤーアニメーション（静止・移動・衝突）<br>
+                • パーティクルエフェクト<br>
+                • BGM & 効果音
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button id="bgmToggle" class="bgm-button on" onclick="toggleBGM()">🎵 BGM ON</button>
+            <button onclick="restartGame()">🔄 新しい迷路で再スタート</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <script src="performance-monitor.js"></script>
+    <script src="maze-game.js"></script>
+    
+    <script>
+        // ユーザーの最初のインタラクションでBGMを有効化
+        let userInteracted = false;
+        
+        function enableAudio() {
+            if (!userInteracted) {
+                userInteracted = true;
+                const gameScene = game.scene.getScene('GameScene');
+                if (gameScene && gameScene.audioContext && gameScene.audioContext.state === 'suspended') {
+                    gameScene.audioContext.resume();
+                }
+            }
+        }
+        
+        // 各種イベントでオーディオを有効化
+        document.addEventListener('click', enableAudio);
+        document.addEventListener('keydown', enableAudio);
+        document.addEventListener('touchstart', enableAudio);
+    </script>
+</body>
+</html>
