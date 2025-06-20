@@ -7,6 +7,7 @@ Amazon Q CLIを活用して開発した HTML5 迷路脱出ゲームです。
 プレイヤーキャラクターを操作して、ランダムに生成される迷路を脱出するゲームです。パフォーマンス監視機能付きで、ゲームの動作状況をリアルタイムで確認できます。
 
 ![](maze-game-made-with-amazon-q-cli.png)
+[こちら](https://mayosuke.github.io/maze-game-made-with-amazon-c-cli/)で遊べます🕹️
 
 ## 🎯 ゲーム仕様
 
